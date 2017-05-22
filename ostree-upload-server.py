@@ -113,17 +113,20 @@ class Workers:
     def __init__(self):
         self.workers = []
         self.quit_workers = Event()
+
     def start(self, task_list, worker_count=4):
         for i in range(worker_count):
             worker = Greenlet.spawn(self._work,
                                     task_list.get_queue(),
                                     self.quit_workers)
             self.workers.append(worker)
+
     def stop(self):
         self.quit_workers.set()
         for w in self.workers:
             w.join()
         self.quit_workers.clear()
+
     def _work(self, queue, quit):
         global latest_task_complete
         count = 0
@@ -161,9 +164,11 @@ if __name__=='__main__':
     tempdir = tempfile.mkdtemp(prefix="ostree-upload-server-")
     atexit.register(os.rmdir, tempdir)
 
+    # TODO: these can be made Workers members
     latest_task_complete = time()
     latest_maintenance_complete = time()
     active_upload_counter = Counter()
+
     task_list = TaskList()
 
     parser = argparse.ArgumentParser()
